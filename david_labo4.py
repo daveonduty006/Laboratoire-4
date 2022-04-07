@@ -72,10 +72,17 @@ def atm():
 
     def decryption():
         f_e = open("bd.txt", "r")
-        f_e_lines = f_e.readlines()
+        f_e_rawlines = f_e.readlines()
 
-        for index in range(len(f_e_lines)):
-            f_e_lines[index] = f_e_lines[index].split()
+        f_e_lines = []
+        start, end = 0, 6
+        for ele in range(start, end):
+            for index in range(len(f_e_rawlines)):
+                
+
+
+            
+
 
         print(f_e_lines)
 
