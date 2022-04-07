@@ -29,59 +29,69 @@ def atm():
     def encryption():
         f = open("bd_original.txt", "r", encoding="utf8")
 
-        # code source: https://pynative.com/python-count-number-of-lines-in-file/
-        # user: Vishal
-        with open('bd_original.txt', 'r', encoding="utf8") as fp:
-            for count, line in enumerate(fp):
-                pass
-        line_count = count + 1
+        l_of_lines = f.readlines()
+        for index in range(len(l_of_lines)):
+            l_of_lines[index] = l_of_lines[index].split()
 
-        l_of_keys = []
-        for line in range(line_count):
-            key = f.readline(5)
-            l_of_keys.append(key)
-
-
-        for ele in range(len(f_lines)):
-            l_of_removes = ["\t", "\n", " ", "[", "]", ",", "'", "#", "%"]
-            for remove in l_of_removes:
-                f_lines[ele] = f_lines[ele].replace(remove, "")            
+        del l_of_lines[0]         
         
         f.close()
 
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         base10 = "0123456789"
-        f_encrypted = []
-        for ele in f_lines:
-            ele_e = ""
-            for index in range(len(ele)):
-                if ele[index] in alphabet:
-                    jindex = alphabet.index(ele[index])
-                    if jindex == 25:
-                        ele_e = ele_e + alphabet[jindex+1]
-                    else: 
-                        ele_e = ele_e + alphabet[jindex+1]
-                elif ele[index] in base10:
-                    kindex = int(ele[index])
-                    if kindex == 9:
-                        ele_e = ele_e + "0"
-                    else: 
-                        ele_e = ele_e + base10[kindex+1]
-                else:
-                    ele_e = ele_e + ele[index]
-            f_encrypted.append(ele_e)
+        l_of_lines_e = []
+        for sublist in l_of_lines:
+            sub_l_e = []
+            for str in sublist:
+                str_e = ""
+                for index in range(len(str)):
+                    if str[index] in alphabet:
+                        jindex = alphabet.index(str[index])
+                        if jindex == 25:
+                            str_e = str_e + alphabet[jindex+1]
+                        else: 
+                            str_e = str_e + alphabet[jindex+1]
+                    elif str[index] in base10:
+                        kindex = int(str[index])
+                        if kindex == 9:
+                            str_e = str_e + "0"
+                        else: 
+                            str_e = str_e + base10[kindex+1]
+                    else:
+                        str_e = str_e + str[index]
+                sub_l_e.append(str_e)
+            l_of_lines_e.append(sub_l_e)
 
-        print(f_encrypted)
+        f_e = open("bd.txt", "w", encoding="utf8")
 
-        f_e = open("bd.txt", "w")
-        f_e.write(f_encrypted)
+        for sublist in l_of_lines_e:
+            for str in sublist:
+                f_e.write(str + "\n")
         f_e.close()
 
 
     def decryption():
         f_e = open("bd.txt", "r")
-        f_e_lines = f_e.read()
+        f_e_lines = f_e.readlines()
+
+        for index in range(len(f_e_lines)):
+            f_e_lines[index] = f_e_lines[index].split()
+
+        print(f_e_lines)
+
         f_e.close()
+
+        #l_of_lines_e = []
+        #start = 0
+        #step = 6
+        #for index in range(start,len(f_e_lines),step):
+        #    l_of_lines_e.append(f_e_lines[index:step])
+        #    start = start + 6
+        #    step = step + 6
+
+        
+
+        print(l_of_lines_e)
 
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         base10 = "0123456789"

@@ -1,5 +1,5 @@
 #Numéro_de_compt	Mot_de_passe	Montant_chèque	Montant_épargne	Montant_placement	taux_intérêt
-#1234	            voiture1	    100	            1000	        10 000	            1.8%
-#3456	            chat123	        150	            2000	        25 000	            3%
+#1234	            voiture1	    100	            1000	        10000	            1.8%
+#3456	            chat123	        150	            2000	        25000	            3%
 #3333	            1234	        5	            100	            1000	            15%
 #0000	            admin	        0	            0	            0	                0%
