@@ -5,9 +5,10 @@ def atm():
         decrypted_list = file_read()
         data = dictionary(decrypted_list)
         login_id = user_login(data)
+        ACCOUNT_SEL = user_acc()
         exit = False
         while not exit:
-            ACCOUNT_SEL, USER_INPUT = user_menu(data, login_id)
+            USER_INPUT = user_menu(data, login_id, ACCOUNT_SEL)
             if USER_INPUT == 1:
                 deposit(data, login_id, ACCOUNT_SEL)
             elif USER_INPUT == 2:
@@ -17,15 +18,10 @@ def atm():
             elif USER_INPUT == 5:
                 exit = True
                 print("Bonne journée \U0001F642")
-            if USER_INPUT != 5:
-                user_sel = input("Désirez-vous faire d'autres opérations? O/N ")
-                if user_sel == "N":
-                    exit = True
-                    print("Bonne journée \U0001F642")
     # Sous-fonction compilant l'information d'une base de données non-encryptée (bd.txt)
     def file_read():
         try:
-            with open("C:/Users/e2295349/Desktop/Labo4/bd.txt", "r") as f:
+            with open("bd_unencrypted.txt", "r") as f:
                 raw_list = f.read().splitlines()
                 f.close()
                 data_list = []
@@ -36,9 +32,8 @@ def atm():
                 decrypted_list = decryption(encrypted_list)
                 return decrypted_list
         except FileNotFoundError:
-            f = open("bd_encrypt.txt", "r")
+            f = open("bd.txt", "r")
             raw_list = f.read().splitlines()
-            print(raw_list)
             f.close()
             encrypted_list = []
             for ele in raw_list:
@@ -50,13 +45,13 @@ def atm():
             return decrypted_list
     # Sous-fonction sauvegardant des données encryptées dans une base de donnée (bd_encrypt.txt)
     def file_write(encrypted_list):
-        f = open("bd_encrypt.txt", "w", encoding="utf8")
+        f = open("bd.txt", "w")
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
     # Sous-fonction ajoutant des données encryptées dans la base de données encrypt.txt (ADMIN PRIVILEGE)
     def file_update(encrypted_list):
-        f = open("bd_encrypt.txt", "a", encoding="utf8")
+        f = open("bd.txt", "a")
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
@@ -124,19 +119,20 @@ def atm():
                     file_write(encrypted_list)
                 elif ADMIN_SEL == 4:
                     exit1 = True
-            exit = True
-        
-    # Sous-fonction offrant un menu d'opérations aux utilisateurs      
-    def user_menu(data, login_id):
+            exit = True        
+    # Sous-fonction offrant un menu d'opérations aux utilisateurs  
+    def user_acc():
+        ACCOUNT_SEL = 0
+        while not 1 <= ACCOUNT_SEL <= 3:
+            ACCOUNT_SEL = int(input(f"\n1. Compte chèque\n"
+                                    f"2. Compte épargne\n"
+                                    f"3. Compte placements\n"
+                                    f"Choisissez le compte: "))
+        return ACCOUNT_SEL
+    def user_menu(data, login_id, ACCOUNT_SEL):
+        USER_INPUT = 0
         exit = False
         while not exit:
-            ACCOUNT_SEL = 0
-            while not 1 <= ACCOUNT_SEL <= 3:
-                ACCOUNT_SEL = int(input(f"\n1. Compte chèque\n"
-                                        f"2. Compte épargne\n"
-                                        f"3. Compte placements\n"
-                                        f"Choisissez le compte: "))
-            USER_INPUT = 0
             if ACCOUNT_SEL == 3:
                 while not 1 <= USER_INPUT <= 5:
                     print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
@@ -148,7 +144,9 @@ def atm():
                                            f"Choisissez une option: "))
                 if USER_INPUT != 4:
                     exit = True
-            else: 
+                else:
+                    ACCOUNT_SEL = user_acc() 
+            if ACCOUNT_SEL != 3:
                 while not 1 <= USER_INPUT <= 4:
                     print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
                     USER_INPUT = int(input(f"1. Faire un dépot\n"
@@ -157,11 +155,10 @@ def atm():
                                            f"4. Terminer\n"
                                            f"Choisissez une option: "))
                 if USER_INPUT != 3:
-                    exit = True  
-        if ACCOUNT_SEL != 3:
-            if USER_INPUT == 4:
-                USER_INPUT = 5              
-        return ACCOUNT_SEL, USER_INPUT
+                    exit = True
+                else: 
+                    ACCOUNT_SEL = user_acc()             
+        return USER_INPUT
     # Sous-fonction opérant le dépôt d'argent dans les comptes bancaires des utilisateurs
     def deposit(data, login_id, Acc):
         user_dep = int(input("\nMontant à déposer: "))
