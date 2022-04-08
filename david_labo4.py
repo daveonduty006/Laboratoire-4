@@ -2,10 +2,7 @@
 def atm():
     # Sous-fonction contrôllant le flux du programme
     def execution():
-        data_list = file_read()
-        encrypted_list = encryption(data_list)
-        file_write(encrypted_list)
-        decrypted_list = decryption(encrypted_list)
+        decrypted_list = file_read()
         data = dictionary(decrypted_list)
         login_id = user_login(data)
         exit = False
@@ -27,13 +24,30 @@ def atm():
                     print("Bonne journée \U0001F642")
     # Sous-fonction compilant l'information d'une base de données non-encryptée (bd.txt)
     def file_read():
-        f = open("bd.txt", "r", encoding="utf8")
-        raw_list = f.read().splitlines()
-        f.close()
-        data_list = []
-        for ele in raw_list:
-            data_list.append(ele.replace("#", "").replace("%", ""))
-        return data_list
+        try:
+            with open("C:/Users/e2295349/Desktop/Labo4/bd.txt", "r") as f:
+                raw_list = f.read().splitlines()
+                f.close()
+                data_list = []
+                for ele in raw_list:
+                    data_list.append(ele.replace("#", "").replace("%", ""))
+                encrypted_list = encryption(data_list)
+                file_write(encrypted_list)
+                decrypted_list = decryption(encrypted_list)
+                return decrypted_list
+        except FileNotFoundError:
+            f = open("bd_encrypt.txt", "r")
+            raw_list = f.read().splitlines()
+            print(raw_list)
+            f.close()
+            encrypted_list = []
+            for ele in raw_list:
+                encrypted_list.append(ele.replace("#", "").replace("%", ""))
+            decrypted_list = decryption(encrypted_list)
+            encrypted_list = encryption(decrypted_list)
+            decrypted_list = decryption(encrypted_list)
+            file_write(encrypted_list)
+            return decrypted_list
     # Sous-fonction sauvegardant des données encryptées dans une base de donnée (bd_encrypt.txt)
     def file_write(encrypted_list):
         f = open("bd_encrypt.txt", "w", encoding="utf8")
