@@ -13,7 +13,8 @@ def atm():
             deposit(data, login_id, ACCOUNT_SEL)
         elif USER_INPUT == 2:
             withdrawal(data, login_id, ACCOUNT_SEL)
-
+        elif USER_INPUT == 3: 
+            inv_returns(data, login_id, ACCOUNT_SEL)
 
     def file_read():
         f = open("bd.txt", "r", encoding="utf8")
@@ -27,6 +28,13 @@ def atm():
     def file_write(encrypted_list):
         f = open("bd_encrypt.txt", "w", encoding="utf8")
         write_list = []
+        for ele in encrypted_list:
+            f.write(f"{ele}\n")
+        f.close()
+
+    def file_update(encrypted_list):
+        f = open("bd_encrypt.txt", "a", encoding="utf8")
+        addend_list = []
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
@@ -107,8 +115,41 @@ def atm():
         while login_ps not in data[login_id]:
             print("\nMot de passe invalide, veuillez recommencer svp\n")
             login_ps = input("Entrez le mot de passe de votre compte: ")
+        if login_id == "0000" and login_ps == "admin":
+            admin_menu(data)
         return login_id
 
+    def admin_menu(data):
+        ADMIN_SEL = 0
+        while not 1 <= ADMIN_SEL <= 3:
+            ADMIN_SEL = int(input(f"\n1. Ajouter un compte\n"
+                                  f"2. Enlever un compte\n"
+                                  f"3. Changer taux intêret pour compte\n"
+                                  f"Choisissez une option: "))
+        if ADMIN_SEL == 1:
+            new_acc_num = input("\nEntrez le nouveau numéro de compte (max 4ch): ")
+            new_acc_ps = input("\nEntrez le mot de passe (lettres minuscules): ")
+            new_acc_chq_bal = "0"
+            new_acc_sav_bal = "0"
+            new_acc_inv_bal = "0"
+            new_acc = [new_acc_num, new_acc_ps, new_acc_chq_bal, new_acc_sav_bal,\
+                       new_acc_inv_bal]
+            encrypted_list = encryption(new_acc)
+            file_update(encrypted_list)
+        if ADMIN_SEL == 2:
+            targeted_acc = input("\nEntrez le numéro de compte visé: ")
+            data.pop(targeted_acc)
+            data_list = dict_to_list(data)
+            encrypted_list = encryption(data_list)
+            file_write(encrypted_list)
+        if ADMIN_SEL == 3:
+            targeted_acc = input(f"\nEntrez le numéro de compte visé: ")
+            new_interest_rate = input(f"\nEntrez le nouveau taux (sans le symbole%): ")
+            data[targeted_acc][4] = new_interest_rate
+            data_list = dict_to_list(data)
+            encrypted_list = encryption(data_list)
+            file_write(encrypted_list)   
+            
     def user_menu(data, login_id):
         exit = False
         while not exit:
@@ -119,16 +160,30 @@ def atm():
                                         f"3. Compte placements\n"
                                         f"Choisissez le compte: "))
             USER_INPUT = 0
-            while not 1 <= USER_INPUT <= 5:
-                print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
-                USER_INPUT = int(input(f"1. Faire un dépot\n"
-                                       f"2. Faire un retrait\n"
-                                       f"3. Voir retour de placement\n"
-                                       f"4. Changer de compte\n"
-                                       f"5. Terminer\n"
-                                       f"Choisissez une option: "))
-            if USER_INPUT != 4:
-                exit = True
+            if ACCOUNT_SEL == 3:
+                while not 1 <= USER_INPUT <= 5:
+                    print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
+                    USER_INPUT = int(input(f"1. Faire un dépot\n"
+                                           f"2. Faire un retrait\n"
+                                           f"3. Voir retour de placement\n"
+                                           f"4. Changer de compte\n"
+                                           f"5. Terminer\n"
+                                           f"Choisissez une option: "))
+                if USER_INPUT != 4:
+                    exit = True
+            else: 
+                while not 1 <= USER_INPUT <= 4:
+                    print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
+                    USER_INPUT = int(input(f"1. Faire un dépot\n"
+                                           f"2. Faire un retrait\n"
+                                           f"3. Changer de compte\n"
+                                           f"4. Terminer\n"
+                                           f"Choisissez une option: "))
+                if USER_INPUT != 3:
+                    exit = True  
+        if ACCOUNT_SEL != 3:
+            if USER_INPUT == 4:
+                USER_INPUT = 5              
         return ACCOUNT_SEL, USER_INPUT
 
     def deposit(data, login_id, Acc):
@@ -154,31 +209,21 @@ def atm():
         encrypted_list = encryption(data_list)
         file_write(encrypted_list)
 
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def inv_returns(data, login_id, Acc):
+        interest = float(data[login_id][4])
+        init_place = int(data[login_id][Acc])
+        year_1 = float(init_place+(interest/100*init_place))
+        year_2 = float(year_1+(interest/100*year_1))
+        year_3 = float(year_2+(interest/100*year_2))
+        year_4 = float(year_3+(interest/100*year_3))
+        year_5 = float(year_4+(interest/100*year_4))
+        print(f"\nSolde actuel = {init_place}$\n"
+              f"Taux intêrets = {interest}%\n"
+              f"1 an(s) = {year_1:.2f}$\n"
+              f"2 an(s) = {year_2:.2f}$\n"
+              f"3 an(s) = {year_3:.2f}$\n"
+              f"4 an(s) = {year_4:.2f}$\n"
+              f"5 an(s) = {year_5:.2f}$\n")
 
     execution()
 
