@@ -1,193 +1,115 @@
-#Étape 3 (création de la base de données):
-#Vous devez créer une base de donnée avec les information suivantes:
-#Numéro_de_compt	Mot_de_passe	Montant_chèque	Montant_épargne	Montant_placement	taux_intérêt
-#1234	            voiture1	    100	            1000	        10 000	            1.8%
-#3456	            chat123	        150	            2000	        25 000	            3%
-#3333	            1234	        5	            100	            1000	            15%
-#0000	            admin	        0	            0	            0	                0%
-#L'information dans votre base de donnée doit être encryptée en utilisant votre l'algorithme de 
-#l'étape 2. Si vous n'avez pas réussi l'encryptage vous pouvez écrire l'information directement.
-#Indice:
-#Vous pouvez écrire l'information initiale dans un fichier.txt, le lire, le convertir et remplir un 
-#nouveau document ou remplacer le document avec l'information encryptée.
-
-
-
-
-
-
-
+#
 def atm():
 
     def execution():
-        encryption()
-        f_decrypted = decryption()
-        user_id(f_decrypted)
-        user_input = user_menu()
-
-    def data_compil(): 
-        f = open("bd_original.txt", "r", encoding="utf8")
-
-        l_of_lines = f.readlines()
-        # return a list of lines
-
-        f.close() 
-
-        for index in range(len(l_of_lines)):
-            l_of_lines[index] = l_of_lines[index].split()
-        # return a list of lists, the sublists are created when \n is spotted
-
-        l_of_ls_lines = l_of_lines 
-        del l_of_ls_lines[0]
+        data_list = file_read()
+        encrypted_list = encryption(data_list)
+        file_write(encrypted_list)
+        decrypted_list = decryption(encrypted_list)
+        data = dictionary(decrypted_list)
+        login_id = user_login(data)
+        ACCOUNT_SEL, USER_INPUT = user_menu(data, login_id)
+        if USER_INPUT == 1:
+            deposit(data, login_id, ACCOUNT_SEL)
+        elif USER_INPUT == 2:
+            withdrawal(data, login_id, ACCOUNT_SEL)
 
 
-        
-f.close()
+    def file_read():
+        f = open("bd.txt", "r", encoding="utf8")
+        raw_list = f.read().splitlines()
+        f.close()
+        data_list = []
+        for ele in raw_list:
+            data_list.append(ele.replace("#", "").replace("%", ""))
+        return data_list
 
-alphabet = "abcdefghijklmnopqrstuvwxyz"
-base10 = "0123456789"
-l_of_ls_e = []
-for sublist in l_of_ls_lines:
-    l_e = []
-    for ele in sublist:
-        ele_e = ""
-        for index in range(len(ele)):
-            if ele[index] in alphabet:
-                jindex = alphabet.index(ele[index])
-                if jindex == 25:
-                    jindex = 0
-                    ele_e = ele_e + alphabet[jindex]
-                else: 
-                    ele_e = ele_e + alphabet[jindex+1]
-            elif ele[index] in base10:
-                kindex = base10.index(ele[index])
-                if kindex == 9:
-                    kindex = 0
-                    ele_e = ele_e + base10[kindex]
-                else: 
-                    ele_e = ele_e + base10[kindex+1]
-            else:
-                ele_e = ele_e + ele[index]
-        l_e.append(ele_e)
-    l_of_ls_e.append(l_e)
-# list of lists is now encrypted
-
-f_e = open("bd.txt", "w", encoding="utf8")
-
-for sublist in l_of_ls_e:
-    sublist[-1] = sublist[-1] + "\n"
-    f_e.writelines(sublist)
-        
-
-        
-    def encryption():
-        f = open("bd_original.txt", "r", encoding="utf8")
-
-        l_of_lines = f.readlines()
-        for index in range(len(l_of_lines)):
-            l_of_lines[index] = l_of_lines[index].split()
-
-        del l_of_lines[0]         
-        
+    def file_write(encrypted_list):
+        f = open("bd_encrypt.txt", "w", encoding="utf8")
+        write_list = []
+        for ele in encrypted_list:
+            f.write(f"{ele}\n")
         f.close()
 
+    def dictionary(decrypted_list):
+        data = {}
+        for entry in range(0, len(decrypted_list), 6):
+            data[decrypted_list[entry]] = decrypted_list[entry+1:entry+6]
+        return data
+    
+    def dict_to_list(data):
+        keys_list = list(data.keys())
+        data_list = []
+        for key in keys_list:
+            data_list.append(key)
+            for ele in range(0,5):
+                data_list.append(data[key][ele])
+        return data_list
+
+    def encryption(data_list):
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         base10 = "0123456789"
-        l_of_lines_e = []
-        for sublist in l_of_lines:
-            sub_l_e = []
-            for str in sublist:
-                str_e = ""
-                for index in range(len(str)):
-                    if str[index] in alphabet:
-                        jindex = alphabet.index(str[index])
-                        if jindex == 25:
-                            str_e = str_e + alphabet[jindex+1]
-                        else: 
-                            str_e = str_e + alphabet[jindex+1]
-                    elif str[index] in base10:
-                        kindex = int(str[index])
-                        if kindex == 9:
-                            str_e = str_e + "0"
-                        else: 
-                            str_e = str_e + base10[kindex+1]
-                    else:
-                        str_e = str_e + str[index]
-                sub_l_e.append(str_e)
-            l_of_lines_e.append(sub_l_e)
+        encrypted_list = []
+        for ele in data_list:
+            e_ele = ""
+            for index in range(len(ele)):
+                if ele[index] in alphabet:
+                    jindex = alphabet.index(ele[index])
+                    if jindex == 25:
+                        jindex = 0
+                        e_ele += alphabet[jindex]
+                    else: 
+                        e_ele += alphabet[jindex+1]
+                elif ele[index] in base10:
+                    kindex = base10.index(ele[index])
+                    if kindex == 9:
+                        kindex = 0
+                        e_ele += base10[kindex]
+                    else: 
+                        e_ele += base10[kindex+1]
+                else:
+                    e_ele += ele[index]
+            encrypted_list.append(e_ele)
+        return encrypted_list
 
-""        f_e = open("bd.txt", "w", encoding="utf8")
-
-        for sublist in l_of_lines_e:
-            for str in sublist:
-                f_e.write(str + "\n")
-        f_e.close()""
-
-
-    def decryption():
-        f_e = open("bd.txt", "r")
-        f_e_rawlines = f_e.readlines()
-
-        f_e_lines = []
-        start, end = 0, 6
-        for ele in range(start, end):
-            for index in range(len(f_e_rawlines)):
-                
-
-
-            
-
-
-        print(f_e_lines)
-
-        f_e.close()
-
-        #l_of_lines_e = []
-        #start = 0
-        #step = 6
-        #for index in range(start,len(f_e_lines),step):
-        #    l_of_lines_e.append(f_e_lines[index:step])
-        #    start = start + 6
-        #    step = step + 6
-
-        
-
-        print(l_of_lines_e)
-
+    def decryption(encrypted_list):
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         base10 = "0123456789"
-        f_decrypted = ""
-        for index in range(len(f_e_lines)):
-            if f_e_lines[index] in alphabet:
-                jindex = alphabet.index(f_e_lines[index])
-                if jindex == 0:
-                    f_decrypted = f_decrypted + "z"
-                else:
-                    f_decrypted = f_decrypted + alphabet[jindex-1]
-            elif f_e_lines[index] in base10:
-                kindex = int(f_e_lines[index])
-                if kindex == 0:
-                    f_decrypted = f_decrypted + "9"
-                else:
-                    f_decrypted = f_decrypted + base10[kindex-1]   
-            else:
-                f_decrypted = f_decrypted + f_e_lines[index] 
+        decrypted_list = []
+        for ele in encrypted_list:
+            d_ele = ""
+            for index in range(len(ele)):
+                if ele[index] in alphabet:
+                    jindex = alphabet.index(ele[index])
+                    if jindex == 0:
+                        jindex = 25
+                        d_ele += alphabet[jindex]
+                    else: 
+                        d_ele += alphabet[jindex-1]
+                elif ele[index] in base10:
+                    kindex = base10.index(ele[index])
+                    if kindex == 0:
+                        kindex = 9
+                        d_ele += base10[kindex]
+                    else: 
+                        d_ele += base10[kindex-1]
+                else: 
+                    d_ele += ele[index]
+            decrypted_list.append(d_ele)
+        return decrypted_list 
 
-        return f_decrypted
-
-
-    def user_id(decrypted_db):
+    def user_login(data):
         login_id = input("Entrez votre numéro de compte à 4 chiffres: ")
-        login_ps = input("Entrez le mot de passe de votre compte: ")
-
-        while login_id not in decrypted_db and login_ps not in decrypted_db:
+        while login_id not in data.keys():
             print("\nErreur d'identification, veuillez recommencer svp\n")
             login_id = input("Entrez votre numéro de compte à 4 chiffres: ")
+        login_ps = input("Entrez le mot de passe de votre compte: ")
+        while login_ps not in data[login_id]:
+            print("\nMot de passe invalide, veuillez recommencer svp\n")
             login_ps = input("Entrez le mot de passe de votre compte: ")
+        return login_id
 
-
-    def user_menu():
-        account_sel = ""
+    def user_menu(data, login_id):
         exit = False
         while not exit:
             ACCOUNT_SEL = 0
@@ -197,8 +119,9 @@ for sublist in l_of_ls_e:
                                         f"3. Compte placements\n"
                                         f"Choisissez le compte: "))
             USER_INPUT = 0
-            while not 1 <= USER_INPUT <= 5: 
-                USER_INPUT = int(input(f"\n1. Faire un dépot\n"
+            while not 1 <= USER_INPUT <= 5:
+                print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
+                USER_INPUT = int(input(f"1. Faire un dépot\n"
                                        f"2. Faire un retrait\n"
                                        f"3. Voir retour de placement\n"
                                        f"4. Changer de compte\n"
@@ -206,8 +129,56 @@ for sublist in l_of_ls_e:
                                        f"Choisissez une option: "))
             if USER_INPUT != 4:
                 exit = True
+        return ACCOUNT_SEL, USER_INPUT
 
-        return USER_INPUT
+    def deposit(data, login_id, Acc):
+        user_dep = int(input("\nMontant à déposer: "))
+        data[login_id][Acc] = str(int(data[login_id][Acc])+user_dep)
+        print(f"\nLe solde de votre compte: {data[login_id][Acc]}$")
+        data_list = dict_to_list(data)
+        encrypted_list = encryption(data_list)
+        file_write(encrypted_list)
+
+    def withdrawal(data, login_id, Acc):
+        user_dep = int(input("\nMontant à retirer: "))
+        exit = False
+        while not exit:
+            if int(data[login_id][Acc])-user_dep < 0:
+                print("\nFonds disponibles insuffisants")
+                user_dep = int(input("\nMontant à retirer: "))
+            else:
+                data[login_id][Acc] = str(int(data[login_id][Acc])-user_dep)
+                print(f"\nLe solde de votre compte: {data[login_id][Acc]}$")
+                exit = True 
+        data_list = dict_to_list(data)
+        encrypted_list = encryption(data_list)
+        file_write(encrypted_list)
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     execution()
 
