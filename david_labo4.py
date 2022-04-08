@@ -37,14 +37,12 @@ def atm():
     # Sous-fonction sauvegardant des données encryptées dans une base de donnée (bd_encrypt.txt)
     def file_write(encrypted_list):
         f = open("bd_encrypt.txt", "w", encoding="utf8")
-        write_list = []
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
     # Sous-fonction ajoutant des données encryptées dans la base de données encrypt.txt (ADMIN PRIVILEGE)
     def file_update(encrypted_list):
         f = open("bd_encrypt.txt", "a", encoding="utf8")
-        addend_list = []
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
@@ -78,35 +76,42 @@ def atm():
         return login_id
     # Sous-fonction offrant un menu d'opérations à l'administrateur 
     def admin_menu(data):
-        ADMIN_SEL = 0
-        while not 1 <= ADMIN_SEL <= 3:
-            ADMIN_SEL = int(input(f"\n1. Ajouter un compte\n"
-                                  f"2. Enlever un compte\n"
-                                  f"3. Changer taux intêret pour compte\n"
-                                  f"Choisissez une option: "))
-        if ADMIN_SEL == 1:
-            new_acc_num = input("\nEntrez le nouveau numéro de compte (max 4ch): ")
-            new_acc_ps = input("\nEntrez le mot de passe (lettres min. ou ch): ")
-            new_acc_chq_bal = "0"
-            new_acc_sav_bal = "0"
-            new_acc_inv_bal = "0"
-            new_acc = [new_acc_num, new_acc_ps, new_acc_chq_bal, new_acc_sav_bal,\
-                       new_acc_inv_bal]
-            encrypted_list = encryption(new_acc)
-            file_update(encrypted_list)
-        if ADMIN_SEL == 2:
-            targeted_acc = input("\nEntrez le numéro de compte visé: ")
-            data.pop(targeted_acc)
-            data_list = dict_to_list(data)
-            encrypted_list = encryption(data_list)
-            file_write(encrypted_list)
-        if ADMIN_SEL == 3:
-            targeted_acc = input(f"\nEntrez le numéro de compte visé: ")
-            new_interest_rate = input(f"\nEntrez le nouveau taux (sans le symbole%): ")
-            data[targeted_acc][4] = new_interest_rate
-            data_list = dict_to_list(data)
-            encrypted_list = encryption(data_list)
-            file_write(encrypted_list)   
+        exit = False
+        while not exit:
+            exit1 = False
+            while not exit1:
+                ADMIN_SEL = int(input(f"\n1. Ajouter un compte\n"
+                                      f"2. Enlever un compte\n"
+                                      f"3. Changer taux intêret pour compte\n"
+                                      f"4. Terminer\n"
+                                      f"Choisissez une option: "))
+                if ADMIN_SEL == 1:
+                    new_acc_num = input("\nEntrez le nouveau numéro de compte (max 4ch): ")
+                    new_acc_ps = input("\nEntrez le mot de passe (lettres min. ou ch): ")
+                    new_acc_chq_bal = "0"
+                    new_acc_sav_bal = "0"
+                    new_acc_inv_bal = "0"
+                    new_acc = [new_acc_num, new_acc_ps, new_acc_chq_bal, new_acc_sav_bal,\
+                               new_acc_inv_bal]
+                    encrypted_list = encryption(new_acc)
+                    file_update(encrypted_list)
+                elif ADMIN_SEL == 2:
+                    targeted_acc = input("\nEntrez le numéro de compte visé: ")
+                    data.pop(targeted_acc)
+                    data_list = dict_to_list(data)
+                    encrypted_list = encryption(data_list)
+                    file_write(encrypted_list)
+                elif ADMIN_SEL == 3:
+                    targeted_acc = input(f"\nEntrez le numéro de compte visé: ")
+                    new_interest_rate = input(f"\nEntrez le nouveau taux (sans le symbole%): ")
+                    data[targeted_acc][4] = new_interest_rate
+                    data_list = dict_to_list(data)
+                    encrypted_list = encryption(data_list)
+                    file_write(encrypted_list)
+                elif ADMIN_SEL == 4:
+                    exit1 = True
+            exit = True
+        
     # Sous-fonction offrant un menu d'opérations aux utilisateurs      
     def user_menu(data, login_id):
         exit = False
