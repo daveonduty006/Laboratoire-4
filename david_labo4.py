@@ -4,62 +4,46 @@ def atm():
     def execution():
         decrypted_list = file_read()
         data = dictionary(decrypted_list)
-        login_id = user_login(data)
-        ACCOUNT_SEL = user_acc()
-        exit = False
-        while not exit:
-            USER_INPUT = user_menu(data, login_id, ACCOUNT_SEL)
-            if USER_INPUT == 1:
-                deposit(data, login_id, ACCOUNT_SEL)
-            elif USER_INPUT == 2:
-                withdrawal(data, login_id, ACCOUNT_SEL)
-            elif USER_INPUT == 3: 
-                inv_returns(data, login_id, ACCOUNT_SEL)
-            elif USER_INPUT == 5:
-                exit = True
-                print("Bonne journée \U0001F642")
-    # Sous-fonction compilant l'information d'une base de données non-encryptée (bd.txt)
+        login_id, ADMIN_ACCESS = user_login(data)
+        if not ADMIN_ACCESS:
+            user_menu(data, login_id)
+        decrypted_list = dict_to_list(data)
+        encrypted_list = encryption(decrypted_list)
+        file_write(encrypted_list)        
+        print("Bonne journée \U0001F642")
+    # Sous-fonction compilant l'information d'une base de données (bd_unencrypted.txt, bd.txt after initial boot)
     def file_read():
         try:
             with open("bd_unencrypted.txt", "r") as f:
                 raw_list = f.read().splitlines()
                 f.close()
-                data_list = []
+                decrypted_list = []
                 for ele in raw_list:
-                    data_list.append(ele.replace("#", "").replace("%", ""))
-                encrypted_list = encryption(data_list)
-                file_write(encrypted_list)
-                decrypted_list = decryption(encrypted_list)
+                    decrypted_list.append(ele.replace("#", "").replace("%", ""))
                 return decrypted_list
         except FileNotFoundError:
             f = open("bd.txt", "r")
-            raw_list = f.read().splitlines()
+            encrypted_list = f.read().splitlines()
             f.close()
-            encrypted_list = []
-            for ele in raw_list:
-                encrypted_list.append(ele.replace("#", "").replace("%", ""))
             decrypted_list = decryption(encrypted_list)
-            encrypted_list = encryption(decrypted_list)
-            decrypted_list = decryption(encrypted_list)
-            file_write(encrypted_list)
             return decrypted_list
-    # Sous-fonction sauvegardant des données encryptées dans une base de donnée (bd_encrypt.txt)
+    # Sous-fonction sauvegardant des données encryptées dans une base de donnée (bd.txt)
     def file_write(encrypted_list):
         f = open("bd.txt", "w")
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
-    # Sous-fonction ajoutant des données encryptées dans la base de données encrypt.txt (ADMIN PRIVILEGE)
+    # Sous-fonction ajoutant des données non-encryptées dans la base de données !!!ADMIN PRIVILEGE!!!
     def file_update(encrypted_list):
         f = open("bd.txt", "a")
         for ele in encrypted_list:
             f.write(f"{ele}\n")
         f.close()
-    # Sous-fonction réorganisant une liste de données décryptées dans un dictionnaire (data)
+    # Sous-fonction réorganisant une liste de données dans un dictionnaire (data)
     def dictionary(decrypted_list):
         data = {}
-        for entry in range(0, len(decrypted_list), 6):
-            data[decrypted_list[entry]] = decrypted_list[entry+1:entry+6]
+        for key in range(0, len(decrypted_list), 6):
+            data[decrypted_list[key]] = decrypted_list[key+1:key+6]
         return data
     # Sous-fonction réorganisant le dictionnaire en une liste prête pour l'encryptage (data_list)
     def dict_to_list(data):
@@ -72,102 +56,123 @@ def atm():
         return data_list
     # Sous-fonction offrant une option de log-in pour les utilisateurs et l'administrateur
     def user_login(data):
-        login_id = input("Entrez votre numéro de compte à 4 chiffres: ")
+        ADMIN_ACCESS = None
+        login_id = input("\nEntrez votre numéro de compte à 4 chiffres: ")
         while login_id not in data.keys():
-            print("\nErreur d'identification, veuillez recommencer svp\n")
+            print("Numéro de compte invalide, veuillez recommencer svp")
             login_id = input("Entrez votre numéro de compte à 4 chiffres: ")
         login_ps = input("Entrez le mot de passe de votre compte: ")
         while login_ps not in data[login_id]:
-            print("\nMot de passe invalide, veuillez recommencer svp\n")
+            print("Mot de passe invalide, veuillez recommencer svp")
             login_ps = input("Entrez le mot de passe de votre compte: ")
         if login_id == "0000" and login_ps == "admin":
-            admin_menu(data)
-        return login_id
+            ADMIN_SEL = admin_menu(data)
+            ADMIN_ACCESS = ADMIN_SEL
+        return login_id, ADMIN_ACCESS
     # Sous-fonction offrant un menu d'opérations à l'administrateur 
     def admin_menu(data):
         exit = False
         while not exit:
-            exit1 = False
-            while not exit1:
-                ADMIN_SEL = int(input(f"\n1. Ajouter un compte\n"
-                                      f"2. Enlever un compte\n"
-                                      f"3. Changer taux intêret pour compte\n"
-                                      f"4. Terminer\n"
-                                      f"Choisissez une option: "))
-                if ADMIN_SEL == 1:
-                    new_acc_num = input("\nEntrez le nouveau numéro de compte (max 4ch): ")
-                    new_acc_ps = input("\nEntrez le mot de passe (lettres min. ou ch): ")
-                    new_acc_chq_bal = "0"
-                    new_acc_sav_bal = "0"
-                    new_acc_inv_bal = "0"
-                    new_acc = [new_acc_num, new_acc_ps, new_acc_chq_bal, new_acc_sav_bal,\
-                               new_acc_inv_bal]
-                    encrypted_list = encryption(new_acc)
-                    file_update(encrypted_list)
-                elif ADMIN_SEL == 2:
-                    targeted_acc = input("\nEntrez le numéro de compte visé: ")
-                    data.pop(targeted_acc)
-                    data_list = dict_to_list(data)
-                    encrypted_list = encryption(data_list)
-                    file_write(encrypted_list)
-                elif ADMIN_SEL == 3:
-                    targeted_acc = input(f"\nEntrez le numéro de compte visé: ")
-                    new_interest_rate = input(f"\nEntrez le nouveau taux (sans le symbole%): ")
-                    data[targeted_acc][4] = new_interest_rate
-                    data_list = dict_to_list(data)
-                    encrypted_list = encryption(data_list)
-                    file_write(encrypted_list)
-                elif ADMIN_SEL == 4:
-                    exit1 = True
-            exit = True        
-    # Sous-fonction offrant un menu d'opérations aux utilisateurs  
-    def user_acc():
+            ADMIN_SEL = int(input(f"\n1. Ajouter un compte\n"
+                                  f"2. Enlever un compte\n"
+                                  f"3. Changer taux intêret pour compte\n"
+                                  f"4. Terminer\n"
+                                  f"Choisissez une option: "))
+            if ADMIN_SEL == 1: 
+                add_acc(data)
+            elif ADMIN_SEL == 2:
+                rem_acc(data)
+            elif ADMIN_SEL == 3:
+                mod_int(data)
+            elif ADMIN_SEL == 4:
+                exit = True
+        return ADMIN_SEL
+    # Sous-fonction permettant de créer un nouveau compte et de l'ajouter, encryptée, à la base de données !!!ADMIN PRIVILEGE!!!
+    def add_acc(data):
+        new_acc_num = input("\nEntrez le nouveau numéro de compte (max 4ch): ")
+        new_acc_ps = input("Entrez le mot de passe (lettres min. ou ch): ")
+        new_acc_chq_bal = "0"
+        new_acc_sav_bal = "0"
+        new_acc_inv_bal = "0"
+        new_acc_int_rate = "0"
+        new_acc = [new_acc_num, new_acc_ps, new_acc_chq_bal, new_acc_sav_bal,\
+                   new_acc_inv_bal, new_acc_int_rate]              
+        encrypted_list = encryption(new_acc)
+        file_update(encrypted_list) 
+        data[new_acc_num] = [new_acc_ps, new_acc_chq_bal, new_acc_sav_bal,\
+                           new_acc_inv_bal, new_acc_int_rate]    
+    # Sous-fonction permettant d'effacer le compte d'un utilisateur après un log-off de l'administrateur !!!ADMIN PRIVILEGE!!!
+    def rem_acc(data):
+        targeted_acc = input("\nEntrez le numéro du compte visé: ")
+        while targeted_acc not in data.keys():
+            print("Numéro de compte invalide")
+            targeted_acc = input("Entrez le numéro du compte visé: ")
+        data.pop(targeted_acc)
+    # Sous-fonction permettant de modifier le taux d'intêret d'un utilisateur après un log-off de l'administrateur !!!ADMIN PRIVILEGE!!!
+    def mod_int(data):
+        targeted_acc = input("\nEntrez le numéro du compte visé: ")
+        while targeted_acc not in data.keys():
+            print("Numéro de compte invalide")
+            targeted_acc = input("Entrez le numéro du compte visé: ")
+        new_int = input("Entrez le nouveau taux (sans le symbole %): ")
+        while "%" in new_int: 
+            new_int = input("Entrez le nouveau taux (sans le symbole %): ")
+        data[targeted_acc][4] = new_int
+    # Sous-fonction offrant un menu de navigation aux utilisateurs 
+    def user_menu(data, login_id):
         ACCOUNT_SEL = 0
         while not 1 <= ACCOUNT_SEL <= 3:
-            ACCOUNT_SEL = int(input(f"\n1. Compte chèque\n"
-                                    f"2. Compte épargne\n"
-                                    f"3. Compte placements\n"
-                                    f"Choisissez le compte: "))
-        return ACCOUNT_SEL
-    def user_menu(data, login_id, ACCOUNT_SEL):
-        USER_INPUT = 0
-        exit = False
-        while not exit:
-            if ACCOUNT_SEL == 3:
+                ACCOUNT_SEL = int(input(f"\n1. Compte chèque\n"
+                                        f"2. Compte épargne\n"
+                                        f"3. Compte placements\n"
+                                        f"Choisissez le compte: "))
+        if ACCOUNT_SEL == 3:
+            exit1 = False
+            print(f"Le solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
+            while not exit1:
+                USER_INPUT = 0
                 while not 1 <= USER_INPUT <= 5:
-                    print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
                     USER_INPUT = int(input(f"1. Faire un dépot\n"
                                            f"2. Faire un retrait\n"
                                            f"3. Voir retour de placement\n"
                                            f"4. Changer de compte\n"
                                            f"5. Terminer\n"
                                            f"Choisissez une option: "))
-                if USER_INPUT != 4:
-                    exit = True
-                else:
-                    ACCOUNT_SEL = user_acc() 
-            if ACCOUNT_SEL != 3:
+                if USER_INPUT == 4:
+                    user_menu(data, login_id)
+                elif USER_INPUT == 1:
+                    deposit(data, login_id, ACCOUNT_SEL)
+                elif USER_INPUT == 2:
+                    withdrawal(data, login_id, ACCOUNT_SEL)
+                elif USER_INPUT == 3:
+                    inv_returns(data, login_id, ACCOUNT_SEL)
+                else: 
+                    exit1 = True
+        elif ACCOUNT_SEL != 3:
+            exit2= False
+            print(f"Le solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
+            while not exit2:
+                USER_INPUT = 0
                 while not 1 <= USER_INPUT <= 4:
-                    print(f"\nLe solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
                     USER_INPUT = int(input(f"1. Faire un dépot\n"
                                            f"2. Faire un retrait\n"
                                            f"3. Changer de compte\n"
                                            f"4. Terminer\n"
                                            f"Choisissez une option: "))
-                if USER_INPUT != 3:
-                    exit = True
-                else: 
-                    ACCOUNT_SEL = user_acc()             
-        return USER_INPUT
-    # Sous-fonction opérant le dépôt d'argent dans les comptes bancaires des utilisateurs
+                if USER_INPUT == 3:
+                    user_menu(data, login_id)
+                elif USER_INPUT == 1:
+                    deposit(data, login_id, ACCOUNT_SEL)
+                elif USER_INPUT == 2:
+                    withdrawal(data, login_id, ACCOUNT_SEL)
+                else:                    
+                    exit2 = True          
+    # Sous-fonction permettant le dépôt d'argent dans les comptes bancaires des utilisateurs
     def deposit(data, login_id, Acc):
         user_dep = int(input("\nMontant à déposer: "))
         data[login_id][Acc] = str(int(data[login_id][Acc])+user_dep)
         print(f"\nLe solde de votre compte: {data[login_id][Acc]}$")
-        data_list = dict_to_list(data)
-        encrypted_list = encryption(data_list)
-        file_write(encrypted_list)
-    # Sous-fonction opérant le retrait d'argent dans les comptes bancaires des utilisateurs
+    # Sous-fonction permettant le retrait d'argent dans les comptes bancaires des utilisateurs
     def withdrawal(data, login_id, Acc):
         user_dep = int(input("\nMontant à retirer: "))
         exit = False
@@ -179,9 +184,6 @@ def atm():
                 data[login_id][Acc] = str(int(data[login_id][Acc])-user_dep)
                 print(f"\nLe solde de votre compte: {data[login_id][Acc]}$")
                 exit = True 
-        data_list = dict_to_list(data)
-        encrypted_list = encryption(data_list)
-        file_write(encrypted_list)
     # Sous-fonction affichant les projections sur 5 ans des retours d'investissement aux utilisateurs
     def inv_returns(data, login_id, Acc):
         interest = float(data[login_id][4])
@@ -198,7 +200,7 @@ def atm():
               f"3 an(s) = {year_3:.2f}$\n"
               f"4 an(s) = {year_4:.2f}$\n"
               f"5 an(s) = {year_5:.2f}$\n")
-    # Sous-fonction encryptant des données contenues dans une liste (A=B_Z=A, 1=2_9=0)
+    # Sous-fonction encryptant des données contenues dans une liste (encrypted_list) *(A=B_Z=A, 1=2_9=0)*
     def encryption(data_list):
         alphabet = "abcdefghijklmnopqrstuvwxyz"
         base10 = "0123456789"
