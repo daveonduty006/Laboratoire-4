@@ -6,12 +6,12 @@ def atm():
         data = dictionary(decrypted_list)
         login_id, ADMIN_ACCESS = user_login(data)
         if not ADMIN_ACCESS:
-            user_menu(data, login_id)
+            acc_menu(data, login_id)
         decrypted_list = dict_to_list(data)
         encrypted_list = encryption(decrypted_list)
         file_write(encrypted_list)        
         print("Bonne journée \U0001F642")
-    # Sous-fonction compilant l'information d'une base de données (bd_unencrypted.txt, bd.txt after initial boot)
+    # Sous-fonction compilant l'information d'une base de données (bd_unencrypted.txt on initial boot, encrypted bd.txt thereafter)
     def file_read():
         try:
             with open("bd_unencrypted.txt", "r") as f:
@@ -118,55 +118,59 @@ def atm():
         while "%" in new_int: 
             new_int = input("Entrez le nouveau taux (sans le symbole %): ")
         data[targeted_acc][4] = new_int
-    # Sous-fonction offrant un menu de navigation aux utilisateurs 
-    def user_menu(data, login_id):
-        ACCOUNT_SEL = 0
-        while not 1 <= ACCOUNT_SEL <= 3:
-                ACCOUNT_SEL = int(input(f"\n1. Compte chèque\n"
-                                        f"2. Compte épargne\n"
-                                        f"3. Compte placements\n"
-                                        f"Choisissez le compte: "))
-        if ACCOUNT_SEL == 3:
-            exit1 = False
-            print(f"Le solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
-            while not exit1:
-                USER_INPUT = 0
-                while not 1 <= USER_INPUT <= 5:
-                    USER_INPUT = int(input(f"1. Faire un dépot\n"
-                                           f"2. Faire un retrait\n"
-                                           f"3. Voir retour de placement\n"
-                                           f"4. Changer de compte\n"
-                                           f"5. Terminer\n"
-                                           f"Choisissez une option: "))
-                if USER_INPUT == 4:
-                    user_menu(data, login_id)
-                elif USER_INPUT == 1:
-                    deposit(data, login_id, ACCOUNT_SEL)
-                elif USER_INPUT == 2:
-                    withdrawal(data, login_id, ACCOUNT_SEL)
-                elif USER_INPUT == 3:
-                    inv_returns(data, login_id, ACCOUNT_SEL)
-                else: 
-                    exit1 = True
-        elif ACCOUNT_SEL != 3:
-            exit2= False
-            print(f"Le solde de votre compte: {data[login_id][ACCOUNT_SEL]}$")
-            while not exit2:
-                USER_INPUT = 0
-                while not 1 <= USER_INPUT <= 4:
-                    USER_INPUT = int(input(f"1. Faire un dépot\n"
-                                           f"2. Faire un retrait\n"
-                                           f"3. Changer de compte\n"
-                                           f"4. Terminer\n"
-                                           f"Choisissez une option: "))
-                if USER_INPUT == 3:
-                    user_menu(data, login_id)
-                elif USER_INPUT == 1:
-                    deposit(data, login_id, ACCOUNT_SEL)
-                elif USER_INPUT == 2:
-                    withdrawal(data, login_id, ACCOUNT_SEL)
-                else:                    
-                    exit2 = True          
+    # Sous-fonction offrant un menu de sélection de compte à l'utilisateur 
+    def acc_menu(data, login_id):
+        acc_sel = 0
+        while not 1 <= acc_sel <= 3:
+            print("1. Compte Chèque")
+            print("2. Compte Épargne")
+            print("3. Compte Placements")
+            acc_sel = int(input("Choisissez un compte: "))
+        op_menu(data, login_id, acc_sel)
+    # Sous-fonction offrant un menu de navigation dans le compte choisi par l'utilisateur 
+    def op_menu(data, login_id, acc_sel):
+        if acc_sel == 3:
+            print(f"Solde disponible: {data[login_id][3]}$")            
+            user_sel = 0
+            while not 1 <= user_sel <= 5:
+                print("1. Faire un dépôt")
+                print("2. Faire un retrait")
+                print("3. Voir mon retour de placement")
+                print("4. Changer de compte")
+                print("5. Terminer")
+                user_sel = int(input("Choisissez une option: "))
+            if user_sel == 1:
+                deposit(data, login_id, acc_sel)
+                op_menu(data, login_id, acc_sel)
+            elif user_sel == 2:
+                withdrawal(data, login_id, acc_sel)
+                op_menu(data, login_id, acc_sel)
+            elif user_sel == 3:
+                inv_returns(data, login_id, acc_sel)
+                op_menu(data, login_id, acc_sel)
+            elif user_sel == 4:
+                acc_menu(data, login_id)
+            else:
+                return        
+        elif acc_sel != 3:
+            print(f"Solde disponible: {data[login_id][acc_sel]}$")   
+            user_sel = 0
+            while not 1 <= user_sel <= 4:
+                print("1. Faire un dépôt")
+                print("2. Faire un retrait")
+                print("3. Changer de compte")
+                print("4. Terminer")
+                user_sel = int(input("Choisissez une option: "))
+            if user_sel == 1:
+                deposit(data, login_id, acc_sel)
+                op_menu(data, login_id, acc_sel)
+            elif user_sel == 2:
+                withdrawal(data, login_id, acc_sel)
+                op_menu(data, login_id, acc_sel)
+            elif user_sel == 3:
+                acc_menu(data, login_id)
+            else:
+                return       
     # Sous-fonction permettant le dépôt d'argent dans les comptes bancaires des utilisateurs
     def deposit(data, login_id, Acc):
         user_dep = int(input("\nMontant à déposer: "))
